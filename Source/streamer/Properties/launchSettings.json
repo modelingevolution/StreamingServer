@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleApp16": {
+      "commandName": "Project",
+      "commandLineArgs": "6003"
+    }
+  }
+}

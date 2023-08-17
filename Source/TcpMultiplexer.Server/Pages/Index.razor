@@ -1,0 +1,152 @@
+﻿@page "/"
+@using TcpMultiplexer.Server.Data
+@using TcpMultiplexer.Server.Components
+@using System.ComponentModel
+@implements IDisposable
+@inject ServerVm _vm
+@inject IDialogService _dialogService
+<PageTitle>Index</PageTitle>
+
+<Observable Source="_vm.Server">
+    @if (_vm.IsStartEnabled)
+    {
+        <MudButton OnClick="_vm.Start">Start</MudButton>
+    }
+    else if (_vm.IsStopEnabled)
+    {
+        <MudButton OnClick="_vm.Stop">Stop</MudButton>
+        <MudButton OnClick="OnConnectStream">Connect video</MudButton>
+    }
+
+
+    <MudSimpleTable Style="overflow-x: auto;">
+        <thead></thead>
+        <tbody>
+            <tr>
+                <td>State:</td>
+                <td>@_vm.Server.State.ToString()</td>
+            </tr>
+            <tr>
+                <td>Bind address:</td>
+                <td>@_vm.BindAddress</td>
+            </tr>
+            <tr>
+                <td>Started:</td>
+                <td>@_vm.Started</td>
+            </tr>
+        <tr>
+            <td>Buffers:</td>
+            <td>@_vm.AllocatedBuffersBytes</td>
+        </tr>
+            @if (_vm.Server.DisconnectedSources.Any())
+            {
+                <tr>
+                    <td>Disconnected clients: (@(_vm.ReconnectStatus))</td>
+                    <td>@(string.Join(", ", _vm.Server.DisconnectedSources))</td>
+                </tr>
+            }
+            @if (_vm.Erros.Any())
+            {
+                <tr>
+                    <td>Errors: (<MudLink OnClick="@(() => _vm.Erros.Clear())">Clear</MudLink>)</td>
+                    <td>
+                        @foreach (var i in @_vm.Erros)
+                        {
+                            <p style="color:red">@i</p>
+                        }
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </MudSimpleTable>
+</Observable>
+
+<MudSimpleTable>
+    <thead>
+        <tr>
+            <th>Source video address</th>
+            <th>Started</th>
+            <th>Connected clients</th>
+            <th>Received</th>
+            <th>Speed</th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th>Client</th>
+            <th>Started</th>
+            <th>Written bytes</th>
+            <th>Pending bytes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <ObservableForEach ItemSource="_vm.Items">
+            <tr>
+                <td>@(context.Host):@(context.Port)</td>
+                <td>@(context.Started)</td>
+                <td>@(context.StreamMultiplexer.ClientCount)</td>
+                <td>@context.StreamMultiplexer.TotalReadBytes.WithSizeSuffix()</td>
+                <td>@context.Speed</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            @foreach (var i in context.StreamMultiplexer.Chasers.For())
+            {
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>@i.Identifier</td>
+                    <td>@i.Started</td>
+                    <td>@i.WrittenBytes.WithSizeSuffix()</td>
+                    <td>@i.PendingBytes.WithSizeSuffix()</td>
+                </tr>
+            }
+        </ObservableForEach>
+    </tbody>
+</MudSimpleTable>
+
+
+
+@code {
+    private System.Threading.Timer? _timer;
+    protected override void OnInitialized()
+    {
+        _timer = new Timer(OnRefresh, null, 500, 500);
+        _vm.Server.PropertyChanged += OnServerStatusChanged;
+    }
+
+    private void OnRefresh(object? state)
+    {
+        this.InvokeAsync(this.StateHasChanged);
+    }
+
+    private void OnServerStatusChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        this.InvokeAsync(this.StateHasChanged);
+    }
+
+
+    public void Dispose()
+    {
+        _vm.Server.PropertyChanged -= OnServerStatusChanged;
+        _timer?.Dispose();
+    }
+
+    private async Task OnConnectStream()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        _dialogService.Show<VideoStreamControl>("Connect to video stream", options);
+    }
+
+}

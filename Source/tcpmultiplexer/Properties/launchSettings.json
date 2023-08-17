@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "tcpmultiplexer": {
+      "commandName": "Project",
+      "commandLineArgs": "tcp://localhost:6003 6001"
+    }
+  }
+}

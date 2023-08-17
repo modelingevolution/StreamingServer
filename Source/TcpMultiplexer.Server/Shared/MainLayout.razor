@@ -1,0 +1,25 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>Video Stream Multiplexer</PageTitle>
+
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudText Typo="Typo.h5" Class="ml-3">Video Stream Multiplexer</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+    </MudAppBar>
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+
+</MudLayout>
+@code {
+    private bool _isDarkMode = true;
+    private MudThemeProvider _mudThemeProvider = new();
+
+   
+}

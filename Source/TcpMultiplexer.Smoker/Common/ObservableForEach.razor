@@ -1,0 +1,60 @@
+﻿@using System.ComponentModel
+@using System.Collections.Specialized
+
+@typeparam TItem
+  
+@if (IsNotifyPropertyChangedEnabled)
+{
+    @foreach (var i in ItemSource)
+    {
+        <Observable Source="i">  @ChildContent(i) </Observable>
+    }
+}
+else
+{
+    @foreach (var i in ItemSource)
+    { 
+        @ChildContent(i)
+    }
+}
+    
+@code {
+     
+    private IList<TItem> _itemSource;
+
+    [Parameter]
+    public RenderFragment<TItem> ChildContent { get; set; }
+
+    [Parameter]
+    public bool IsNotifyPropertyChangedEnabled { get; set; }
+
+    [Parameter]
+    public IList<TItem> ItemSource
+    {
+        get => _itemSource;
+        set
+        {
+            if (object.Equals(_itemSource, value)) return;
+
+            if (_itemSource != null && _itemSource is INotifyCollectionChanged npc)
+                npc.CollectionChanged -= OnCollectionChanged;
+            _itemSource = value;
+
+            if (_itemSource != null && _itemSource is INotifyCollectionChanged npc2)
+                npc2.CollectionChanged += OnCollectionChanged;
+
+
+
+
+        }
+    }
+
+
+
+    private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        this.InvokeAsync(this.StateHasChanged);
+
+    }
+
+}

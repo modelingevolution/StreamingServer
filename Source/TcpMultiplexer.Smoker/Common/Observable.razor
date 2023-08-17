@@ -1,0 +1,53 @@
+﻿@using System.ComponentModel
+@typeparam TSource
+@implements IDisposable
+@ChildContent(Source)
+
+@code {
+    //TODO: To Controls nuget
+    private TSource? _source;
+
+
+    [Parameter]
+    public RenderFragment<TSource> ChildContent { get; set; }
+
+
+
+    [Parameter]
+    public TSource? Source
+    {
+        get => _source;
+        set
+        {
+            if (object.Equals(_source, value)) return;
+
+
+            if (_source != null)
+                ((INotifyPropertyChanged)(_source)).PropertyChanged -= OnPropertyChanged;
+            _source = value;
+
+
+
+            if (_source != null)
+                ((INotifyPropertyChanged)(_source)).PropertyChanged += OnPropertyChanged;
+
+
+
+        }
+    }
+    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        this.InvokeAsync(this.StateHasChanged);
+    }
+
+
+
+    public void Dispose()
+    {
+        if (_source != null)
+            ((INotifyPropertyChanged)(_source)).PropertyChanged -= OnPropertyChanged;
+    }
+
+
+
+}

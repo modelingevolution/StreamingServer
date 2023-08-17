@@ -1,0 +1,108 @@
+﻿@page "/"
+@using TcpMultiplexer.Smoker.Common
+@inject SmokeVm _vm;
+<PageTitle>Index</PageTitle>
+
+<MudPaper>
+    <MudStack Row="true">
+
+        <MudTextField @bind-Value="_port" Label="Port" Variant="Variant.Outlined" />
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OnGenerate">Generate stream</MudButton>
+    </MudStack>
+    <MudDivider DividerType="DividerType.FullWidth" />
+
+
+    <MudText Typo="Typo.h6">Cameras</MudText>
+    <MudSimpleTable Dense="true">
+        <thead>
+            <tr>
+                <th>Created</th>
+                <th>Port</th>
+                <th>Generated</th>
+                <th>Speed</th>
+                <th>State</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ObservableForEach ItemSource="_vm.Cameras" IsNotifyPropertyChangedEnabled="true">
+                <tr>
+                    <td>@context.Created</td>
+                    <td>@context.Port</td>
+                    <td>@context.Generated.WithSizeSuffix()</td>
+                    <td>@(context.Speed.WithSizeSuffix())/s</td>
+                    <td>@context.State</td>
+                    <td>
+                        <MudButtonGroup Variant="Variant.Outlined">
+                            <MudButton Disabled="@(context.State == GeneratorState.Listening)" OnClick="@context.Listen">Listen</MudButton>
+                            <MudButton Disabled="@(context.State == GeneratorState.Stopped)" OnClick="@context.Stop">Stop</MudButton>
+                            <MudButton Disabled="@(context.State == GeneratorState.Stopped)" OnClick="@context.Pause">Pause</MudButton>
+                            <MudButton Disabled="@(context.State == GeneratorState.Stopped)" OnClick="@context.SpeedUp">2x</MudButton>
+                            <MudButton Disabled="@(context.State == GeneratorState.Stopped)" OnClick="@context.SpeedDown">0.5x</MudButton>
+                        </MudButtonGroup>
+                    </td>
+                </tr>
+
+            </ObservableForEach>
+        </tbody>
+    </MudSimpleTable>
+
+    <MudDivider DividerType="DividerType.FullWidth" />
+
+    <MudText Typo="Typo.h6">Clients</MudText>
+    <MudStack Row="true">
+        <MudTextField @bind-Value="_host" Label="Multiplexer address" Variant="Variant.Outlined" />
+        <MudTextField @bind-Value="_streamName" Label="Stream name" Variant="Variant.Outlined" />
+        <MudButton Color="Color.Primary" OnClick="OnConnect" Variant="Variant.Filled">Connect</MudButton>
+    </MudStack>
+    <MudSimpleTable Dense="true">
+        <thead>
+            <tr>
+                <th>Created</th>
+                <th>Uri</th>
+                <th>Stream name</th>
+                <th>Received</th>
+                <th>Speed</th>
+                <th>Avg. Speed</th>
+                <th>State</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ObservableForEach ItemSource="_vm.Players" IsNotifyPropertyChangedEnabled="true">
+                <tr>
+                    <td>@context.Created</td>
+                    <td>@context.Uri</td>
+                    <td>@context.StreamName</td>
+                    <td>@context.Received.WithSizeSuffix()</td>
+                    <td>@(context.Speed.WithSizeSuffix())/s</td>
+                    <td>@(context.AvgSpeed.WithSizeSuffix())/s</td>
+                    <td>@context.State @context.Error</td>
+                    <td>
+                        <MudButtonGroup Variant="Variant.Outlined">
+                            <MudButton Disabled="@(context.State == PlayerState.Playing)" OnClick="@context.Play">Play</MudButton>
+                            <MudButton Disabled="@(context.State != PlayerState.Playing)" OnClick="@context.Cancel">Stop</MudButton>
+                            
+                        </MudButtonGroup>
+                    </td>
+                </tr>
+
+            </ObservableForEach>
+        </tbody>
+    </MudSimpleTable>
+</MudPaper>
+@code {
+
+    private string _port;
+    private string _host;
+    private string _streamName;
+
+    private Task OnGenerate()
+    {
+        return _vm.AddNew(int.Parse(_port));
+    }
+    private Task OnConnect()
+    {
+        return _vm.ConnectClient(_host, _streamName);
+    }
+}

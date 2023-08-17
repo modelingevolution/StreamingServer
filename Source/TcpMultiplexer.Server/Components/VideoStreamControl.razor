@@ -1,0 +1,44 @@
+﻿@using TcpMultiplexer.Server.Data
+@using System.ComponentModel.DataAnnotations
+
+@inject VideoMultiplexerServer _server
+
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudPaper Class="pa-4">
+            <MudForm @bind-IsValid="@success" @bind-Errors="@errors">
+                <MudTextField @bind-Value="@_host"  Label="Host or IP" Required="true" RequiredError="Host is required!" />
+                <MudNumericField @bind-Value="@_port" Label="Port" RequiredError="Port is required!" />
+            </MudForm>
+        </MudPaper>
+        <MudPaper Class="pa-4 mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@OnConnect">Connect</MudButton>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="5">
+        <MudPaper Class="pa-4 mud-height-full">
+            <MudText Typo="Typo.subtitle2">@($"Errors ({errors.Length})")</MudText>
+                @foreach (var error in errors)
+            {
+                <MudText Color="@Color.Error">@error</MudText>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    string _host;
+    int _port;
+
+    bool success;
+    string[] errors = { };
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private void OnConnect()
+    {
+        _server.ConnectVideoSource(_host, _port);
+        MudDialog.Close();
+    }
+
+}

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "tcpdumper": {
+      "commandName": "Project",
+      "commandLineArgs": "tcp://localhost:6001 file.mp4"
+    }
+  }
+}
