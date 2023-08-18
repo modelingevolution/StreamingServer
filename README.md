@@ -33,7 +33,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Application is created by [ModelingEvolution](https://modelingevolution.com) and it's open-sourced project so feel free to use it wherever you want!
+Application was created by [ModelingEvolution](https://modelingevolution.com) and it's open-sourced project so feel free to use it wherever you want!
 
 
 Full tutorial is available [here](https://www.modelingevolution.com/rasp-player-tutorial).
